@@ -37,12 +37,13 @@ if __name__=="__main__":
 
     model=tf.keras.models.Sequential()
     model.add(tf.keras.layers.Input(X_train.shape[1:]))
-    model.add(tf.keras.layers.Conv1D(50,kernel_size=3))
+    model.add(tf.keras.layers.LSTM(100))
     model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(50))
     model.add(tf.keras.layers.Dense(30))
     model.add(tf.keras.layers.Dense(10))
-    model.add(tf.keras.layers.Dense(5,activation="softmax"))
-    model.compile(optimizer="adam",loss="categorical_crossentropy",metrics="accuracy")
+    model.add(tf.keras.layers.Dense(Y_train.shape[1],activation="sigmoid"))
+    model.compile(optimizer="adam",loss="mean_squared_error",metrics="accuracy")
 
     print(model.summary())
     model.fit(X_train,Y_train,epochs=3,use_multiprocessing=True)
@@ -50,4 +51,4 @@ if __name__=="__main__":
     model.evaluate(X_test,Y_test)
 
     if FLAGS.save_model:
-        model.save("CNN.h5")
+        model.save("LSTM.h5")
