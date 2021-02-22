@@ -8,7 +8,7 @@ SAMPLE_RATE=44100
 FLAGS=None
 
 def process_notes(lines,song_length):
-    Y=np.zeros(shape=(song_length,5),dtype=np.int)
+    Y=np.zeros(shape=(song_length,4),dtype=np.int)
     i=0
     # k: status flag
     # k==0: Initial state
@@ -18,7 +18,7 @@ def process_notes(lines,song_length):
     k=0
     while i<len(lines):
         if k==1 and "Lane: " in lines[i]:
-            lane=int(lines[i].split(": ")[1])
+            lane=int(lines[i].split(": ")[1])-1
             i+=1
             k=2
         elif k==2 and "EndTime: " in lines[i]:
@@ -35,9 +35,6 @@ def process_notes(lines,song_length):
             i+=1
         else:
             i+=1
-    for i in range(len(Y)):
-        if all(Y[i]==np.array([0,0,0,0,0])):
-            Y[i][0]=1
     return Y
 
 def process_tmp_XY(X_tmp,Y_tmp,window,stride):
