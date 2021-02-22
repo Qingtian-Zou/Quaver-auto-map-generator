@@ -1,7 +1,9 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.utils import shuffle
+import argparse
 
+FLAGS=None
 
 if __name__=="__main__":
     gpus = tf.config.list_physical_devices('GPU')
@@ -18,6 +20,15 @@ if __name__=="__main__":
     else:
         tf.config.threading.set_inter_op_parallelism_threads(8)
         tf.config.threading.set_intra_op_parallelism_threads(8)
+
+    parser=argparse.ArgumentParser()
+    parser.add_argument(
+        "--save_model",
+        type=bool,
+        default=True,
+        help="save trained model?"
+    )
+    FLAGS,unparsed=parser.parse_known_args()
 
     X_train=np.load("X_train.npy")
     X_test=np.load("X_test.npy")
@@ -37,3 +48,6 @@ if __name__=="__main__":
     model.fit(X_train,Y_train,epochs=3,use_multiprocessing=True)
     model.evaluate(X_train,Y_train)
     model.evaluate(X_test,Y_test)
+
+    if FLAGS.save_model:
+        model.save("CNN.h5")
