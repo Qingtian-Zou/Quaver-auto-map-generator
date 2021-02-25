@@ -40,8 +40,8 @@ def process_notes(lines,song_length):
 def process_tmp_XY(X_tmp,Y_tmp,window,stride):
     X=[]
     Y=[]
-    for i in range(window-1,X_tmp.shape[0]-1,stride):
-        X.append(X_tmp[i+1-window:i+1])
+    for i in range(window,X_tmp.shape[0]-window-1,stride):
+        X.append(X_tmp[i-window:i+window+1])
         Y.append(Y_tmp[i])
     X=np.array(X)
     Y=np.array(Y)
