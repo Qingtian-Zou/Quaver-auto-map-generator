@@ -7,7 +7,7 @@ WINDOW_LEN=100
 SAMPLE_RATE=44100
 FLAGS=None
 
-def process_notes(lines,song_length):
+def process_notes(lines,song_length,binary_mode=False):
     Y=np.zeros(shape=(song_length,4),dtype=np.int)
     i=0
     # k: status flag
@@ -19,6 +19,11 @@ def process_notes(lines,song_length):
     while i<len(lines):
         if k==1 and "Lane: " in lines[i]:
             lane=int(lines[i].split(": ")[1])-1
+            if binary_mode:
+                if lane<2:
+                    lane=0
+                else:
+                    lane=3
             i+=1
             k=2
         elif k==2 and "EndTime: " in lines[i]:
@@ -59,6 +64,11 @@ if __name__=="__main__":
         type=str,
         help="path to the map file"
     )
+    parser.add_argument(
+        "--binary_mode",
+        type=bool,
+        default=False
+    )
     FLAGS,unparsed=parser.parse_known_args()
     audio=tfio.audio.AudioIOTensor(FLAGS.audio)
     audio_slice=audio[0:WINDOW_LEN]
@@ -75,7 +85,7 @@ if __name__=="__main__":
     note_fi=open(FLAGS.map,'r')
     lines=note_fi.readlines()
     note_fi.close()
-    Y_tmp=process_notes(lines,X_tmp.shape[0])
+    Y_tmp=process_notes(lines,X_tmp.shape[0],FLAGS.binary_mode)
     print("notes process competed...")
 
     X,Y=process_tmp_XY(X_tmp,Y_tmp,WINDOW_LEN,1)

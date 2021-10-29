@@ -3,6 +3,7 @@ import tensorflow_io as tfio
 import argparse
 from sklearn.utils import shuffle
 import numpy as np
+import os
 
 WINDOW_LEN=100
 SAMPLE_RATE=44100
@@ -12,16 +13,16 @@ def process_tmp_XY(X_tmp,window,stride,Y_tmp=None):
     if Y_tmp:
         X=[]
         Y=[]
-        for i in range(window-1,X_tmp.shape[0]-1,stride):
-            X.append(X_tmp[i+1-window:i+1])
+        for i in range(window,X_tmp.shape[0]-window-1,stride):
+            X.append(X_tmp[i-window:i+window+1])
             Y.append(Y_tmp[i])
         X=np.array(X)
         Y=np.array(Y)
         return shuffle(X,Y,random_state=1)
     else:
         X=[]
-        for i in range(window-1,X_tmp.shape[0]-1,stride):
-            X.append(X_tmp[i+1-window:i+1])
+        for i in range(window,X_tmp.shape[0]-window-1,stride):
+            X.append(X_tmp[i-window:i+window+1])
         X=np.array(X)
         return X
 
@@ -53,6 +54,12 @@ if __name__=="__main__":
         type=str,
         help="path to the audio file"
     )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.5,
+        help="probability threshold to put a note"
+    )
     FLAGS,unparsed=parser.parse_known_args()
 
     audio=tfio.audio.AudioIOTensor(FLAGS.audio)
@@ -72,3 +79,22 @@ if __name__=="__main__":
     pred=model.predict(X)
 
     #TODO: convert predictions to notes
+    Y=np.zeros(shape=(len(pred),4),dtype=np.int)
+    for i in range(25,len(pred)-25-1):
+        pred_avg=np.average(pred[i-25:i+25+1],axis=0)
+        for k in range(len(pred_avg)):
+            if pred_avg[k]>FLAGS.threshold:
+                Y[i,k]=1
+
+    # generate map in a lane by lane manner
+    tap_notes={}
+    hold_notes={}
+    for i in range(4):
+        lane_Y=Y[:,i]
+        k=0
+        while k<len(pred):
+            pass
+    lines=[]
+    fi=open(os.path.basename(FLAGS.audio)+".qua",'w')
+    fi.writelines(lines)
+    fi.close()
