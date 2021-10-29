@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.utils import shuffle
 import argparse
 import os
+from tqdm import tqdm
 
 WINDOW_LEN=100
 SAMPLE_RATE=44100
@@ -76,7 +77,7 @@ if __name__=="__main__":
     audio=tfio.audio.AudioIOTensor(FLAGS.audio)
     audio_slice=audio[0:WINDOW_LEN]
     X_tmp=[]
-    for i in range(int(len(audio)//SAMPLE_RATE*1000)):
+    for i in tqdm(range(int(len(audio)//SAMPLE_RATE*1000)),desc="Processing audio file...",ascii=True):
         if (i+1)*SAMPLE_RATE/1000<len(audio):
             X_tmp.append(np.average(audio[i*SAMPLE_RATE//1000:(i+1)*SAMPLE_RATE//1000],axis=0))
         else:
