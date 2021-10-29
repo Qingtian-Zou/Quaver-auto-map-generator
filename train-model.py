@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.utils import shuffle
 import argparse
+import os
 
 FLAGS=None
 
@@ -30,10 +31,42 @@ if __name__=="__main__":
     )
     FLAGS,unparsed=parser.parse_known_args()
 
-    X_train=np.load("X_train.npy")
-    X_test=np.load("X_test.npy")
-    Y_train=np.load("Y_train.npy")
-    Y_test=np.load("Y_test.npy")
+    songs_X_train=[]
+    songs_Y_train=[]
+    songs_X_test=[]
+    songs_Y_test=[]
+    for item in os.listdir("data"):
+        if "X_train" in item:
+            songs_X_train.append(item)
+        elif "X_test" in item:
+            songs_X_test.append(item)
+        elif "Y_train" in item:
+            songs_Y_train.append(item)
+        elif "Y_test" in item:
+            songs_Y_test.append(item)
+
+    data_names=[]
+    for item in songs_X_train:
+        item_name=item.strip("-X_train.npy")
+        if item_name+"-X_test.npy" in songs_X_test and item_name+"-Y_train.npy" in songs_Y_train and item_name+"-Y_test.npy" in songs_Y_test:
+            data_names.append(item_name)
+
+    X_train=[]
+    X_test=[]
+    Y_train=[]
+    Y_test=[]
+    for data_name in data_names:
+        X_train.append(np.load(os.path.join("data",data_name+"-X_train.npy")))
+        X_test.append(np.load(os.path.join("data",data_name+"-X_test.npy")))
+        Y_train.append(np.load(os.path.join("data",data_name+"-Y_train.npy")))
+        Y_test.append(np.load(os.path.join("data",data_name+"-Y_test.npy")))
+
+    X_train=np.concatenate(X_train)
+    X_test=np.concatenate(X_test)
+    Y_train=np.concatenate(Y_train)
+    Y_test=np.concatenate(Y_test)
+    X_train,Y_train=shuffle(X_train,Y_train,random_state=1)
+    X_test,Y_test=shuffle(X_test,Y_test,random_state=1)
 
     model=tf.keras.models.Sequential()
     model.add(tf.keras.layers.Input(X_train.shape[1:]))

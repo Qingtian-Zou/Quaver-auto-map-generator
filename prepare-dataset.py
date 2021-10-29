@@ -2,6 +2,7 @@ import tensorflow_io as tfio
 import numpy as np
 from sklearn.utils import shuffle
 import argparse
+import os
 
 WINDOW_LEN=100
 SAMPLE_RATE=44100
@@ -57,12 +58,12 @@ if __name__=="__main__":
     parser.add_argument(
         "--audio",
         type=str,
-        help="path to the audio file"
+        help="Path to the audio file."
     )
     parser.add_argument(
         "--map",
         type=str,
-        help="path to the map file"
+        help="Path to the map file. Currently only 4-key maps are supported."
     )
     parser.add_argument(
         "--binary_mode",
@@ -70,6 +71,8 @@ if __name__=="__main__":
         default=False
     )
     FLAGS,unparsed=parser.parse_known_args()
+    item_name=os.path.basename(FLAGS.audio).strip(".mp3")
+
     audio=tfio.audio.AudioIOTensor(FLAGS.audio)
     audio_slice=audio[0:WINDOW_LEN]
     X_tmp=[]
@@ -93,7 +96,7 @@ if __name__=="__main__":
     n_data = len(X)
     X_train, X_test = X[:n_data//5*4], X[n_data//5*4:]
     Y_train, Y_test = Y[:n_data//5*4], Y[n_data//5*4:]
-    np.save("X_train.npy",X_train)
-    np.save("X_test.npy",X_test)
-    np.save("Y_train.npy",Y_train)
-    np.save("Y_test.npy",Y_test)
+    np.save(os.path.join("data",item_name+"-X_train.npy"),X_train)
+    np.save(os.path.join("data",item_name+"-X_test.npy"),X_test)
+    np.save(os.path.join("data",item_name+"-Y_train.npy"),Y_train)
+    np.save(os.path.join("data",item_name+"-Y_test.npy"),Y_test)
